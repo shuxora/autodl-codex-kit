@@ -1,0 +1,34 @@
+# ============================================================================
+# Codex CLI 配置（autodl-codex-kit 模板）
+#
+# ⚠ 三条铁律（踩过的坑，别改）：
+#   1. sandbox_mode 必须写成 danger-full-access：
+#      AutoDL 容器禁用 unshare，bubblewrap 沙箱完全无法工作，
+#      否则 codex 执行的每条命令都 exit 1（bwrap: No permissions to create new namespace）。
+#   2. 顶层键（model / sandbox_mode / approval_policy 等）必须写在所有 [table] 之前，
+#      写在 [table] 之后会被 TOML 当作该表的成员，导致设置静默失效。
+#   3. 绝对不要写 [mcp_servers.codex_apps]：
+#      它会让整份 config.toml 解析失败（报 invalid transport），所有设置包括沙箱一起失效。
+#      要关内置连接器请用 features.apps = false。
+# ============================================================================
+
+# 订阅登录（auth_mode=chatgpt）时用订阅专有模型名，例如 gpt-5.6-luna。
+# 若改用 API Key 登录，必须换成官方 API 真实存在的模型名，否则报模型不存在。
+model = "gpt-5.6-luna"
+model_reasoning_effort = "low"
+
+sandbox_mode = "danger-full-access"
+approval_policy = "on-request"
+
+# 关闭内置 Apps/连接器（其 MCP 服务器启动必超时，且用不到）
+features.apps = false
+
+# 显式指定日志目录会额外开启 TUI 明文日志 codex-tui.log，便于排查启动问题
+log_dir = "/root/.codex/log"
+
+# 信任的工作目录（codex exec 在非 git 目录仍需 --skip-git-repo-check）
+[projects."/root"]
+trust_level = "trusted"
+
+[projects."/root/autodl-tmp"]
+trust_level = "trusted"
